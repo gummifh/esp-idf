@@ -112,7 +112,7 @@
 typedef struct {
     esp_sleep_pd_option_t pd_options[ESP_PD_DOMAIN_MAX];
     uint64_t sleep_duration;
-    uint32_t wakeup_triggers : 11;
+    uint32_t wakeup_triggers : 15;
     uint32_t ext1_trigger_mode : 1;
     uint32_t ext1_rtc_gpio_mask : 18;
     uint32_t ext0_trigger_level : 1;
@@ -497,8 +497,8 @@ esp_err_t esp_sleep_disable_wakeup_source(esp_sleep_source_t source)
         s_config.wakeup_triggers &= ~(RTC_UART0_TRIG_EN | RTC_UART1_TRIG_EN);
     }
 #if defined(CONFIG_ESP32_ULP_COPROC_ENABLED) || defined(CONFIG_ESP32S2_ULP_COPROC_ENABLED)
-    else if (CHECK_SOURCE(source, ESP_SLEEP_WAKEUP_ULP, RTC_ULP_TRIG_EN)) {
-        s_config.wakeup_triggers &= ~RTC_ULP_TRIG_EN;
+    else if (CHECK_SOURCE(source, ESP_SLEEP_WAKEUP_ULP, RTC_COCPU_TRIG_EN)) {
+        s_config.wakeup_triggers &= ~RTC_COCPU_TRIG_EN;
     }
 #endif
     else {
@@ -525,7 +525,7 @@ esp_err_t esp_sleep_enable_ulp_wakeup(void)
     return ESP_ERR_INVALID_STATE;
 #endif // CONFIG_ESP32_ULP_COPROC_ENABLED
 #elif CONFIG_IDF_TARGET_ESP32S2
-    s_config.wakeup_triggers |= (RTC_ULP_TRIG_EN | RTC_COCPU_TRIG_EN | RTC_COCPU_TRAP_TRIG_EN);
+    s_config.wakeup_triggers |= (RTC_COCPU_TRIG_EN);
     return ESP_OK;
 #endif
 }
@@ -595,7 +595,7 @@ esp_err_t esp_sleep_enable_ext0_wakeup(gpio_num_t gpio_num, int level)
     if (!RTC_GPIO_IS_VALID_GPIO(gpio_num)) {
         return ESP_ERR_INVALID_ARG;
     }
-    if (s_config.wakeup_triggers & (RTC_TOUCH_TRIG_EN | RTC_ULP_TRIG_EN)) {
+    if (s_config.wakeup_triggers & (RTC_TOUCH_TRIG_EN | RTC_COCPU_TRIG_EN)) {
         ESP_LOGE(TAG, "Conflicting wake-up triggers: touch / ULP");
         return ESP_ERR_INVALID_STATE;
     }
@@ -692,7 +692,7 @@ uint64_t esp_sleep_get_ext1_wakeup_status(void)
 
 esp_err_t esp_sleep_enable_gpio_wakeup(void)
 {
-    if (s_config.wakeup_triggers & (RTC_TOUCH_TRIG_EN | RTC_ULP_TRIG_EN)) {
+    if (s_config.wakeup_triggers & (RTC_TOUCH_TRIG_EN | RTC_COCPU_TRIG_EN)) {
         ESP_LOGE(TAG, "Conflicting wake-up triggers: touch / ULP");
         return ESP_ERR_INVALID_STATE;
     }
@@ -744,8 +744,6 @@ esp_sleep_wakeup_cause_t esp_sleep_get_wakeup_cause(void)
         return ESP_SLEEP_WAKEUP_TIMER;
     } else if (wakeup_cause & RTC_TOUCH_TRIG_EN) {
         return ESP_SLEEP_WAKEUP_TOUCHPAD;
-    } else if (wakeup_cause & RTC_ULP_TRIG_EN) {
-        return ESP_SLEEP_WAKEUP_ULP;
     } else if (wakeup_cause & RTC_GPIO_TRIG_EN) {
         return ESP_SLEEP_WAKEUP_GPIO;
     } else if (wakeup_cause & (RTC_UART0_TRIG_EN | RTC_UART1_TRIG_EN)) {
@@ -787,7 +785,7 @@ static uint32_t get_power_down_flags(void)
 
     if ((s_config.pd_options[ESP_PD_DOMAIN_RTC_SLOW_MEM] == ESP_PD_OPTION_AUTO) &&
             ((size_t) &_rtc_slow_length > 0 ||
-             (s_config.wakeup_triggers & RTC_ULP_TRIG_EN))) {
+             (s_config.wakeup_triggers & RTC_COCPU_TRIG_EN))) {
         s_config.pd_options[ESP_PD_DOMAIN_RTC_SLOW_MEM] = ESP_PD_OPTION_ON;
     }
 
@@ -805,7 +803,7 @@ static uint32_t get_power_down_flags(void)
     if (s_config.pd_options[ESP_PD_DOMAIN_RTC_PERIPH] == ESP_PD_OPTION_AUTO) {
         if (s_config.wakeup_triggers & (RTC_EXT0_TRIG_EN | RTC_GPIO_TRIG_EN)) {
             s_config.pd_options[ESP_PD_DOMAIN_RTC_PERIPH] = ESP_PD_OPTION_ON;
-        } else if (s_config.wakeup_triggers & (RTC_TOUCH_TRIG_EN | RTC_ULP_TRIG_EN)) {
+        } else if (s_config.wakeup_triggers & (RTC_TOUCH_TRIG_EN | RTC_COCPU_TRIG_EN)) {
             // In both rev. 0 and rev. 1 of ESP32, forcing power up of RTC_PERIPH
             // prevents ULP timer and touch FSMs from working correctly.
             s_config.pd_options[ESP_PD_DOMAIN_RTC_PERIPH] = ESP_PD_OPTION_OFF;

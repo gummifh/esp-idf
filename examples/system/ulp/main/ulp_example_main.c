@@ -16,7 +16,7 @@
 #include "soc/rtc_periph.h"
 #include "driver/gpio.h"
 #include "driver/rtc_io.h"
-#include "esp32/ulp.h"
+#include "esp32s2/ulp.h"
 #include "ulp_main.h"
 
 extern const uint8_t ulp_main_bin_start[] asm("_binary_ulp_main_bin_start");

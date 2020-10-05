@@ -691,17 +691,17 @@ void rtc_sleep_init(rtc_sleep_config_t cfg);
 #define RTC_EXT1_TRIG_EN    BIT(1)  //!< EXT1 GPIO wakeup
 #define RTC_GPIO_TRIG_EN    BIT(2)  //!< GPIO wakeup (light sleep only)
 #define RTC_TIMER_TRIG_EN   BIT(3)  //!< Timer wakeup
-#define RTC_SDIO_TRIG_EN    BIT(4)  //!< SDIO wakeup (light sleep only)
+//#define RTC_SDIO_TRIG_EN    BIT(4)  //!< SDIO wakeup (light sleep only)
 #define RTC_WIFI_TRIG_EN    BIT(5)  //!< WIFI wakeup (light sleep only)
 #define RTC_UART0_TRIG_EN   BIT(6)  //!< UART0 wakeup (light sleep only)
 #define RTC_UART1_TRIG_EN   BIT(7)  //!< UART1 wakeup (light sleep only)
 #define RTC_TOUCH_TRIG_EN   BIT(8)  //!< Touch wakeup
-#define RTC_ULP_TRIG_EN     BIT(9)  //!< ULP wakeup
-#define RTC_BT_TRIG_EN      BIT(10) //!< BT wakeup (light sleep only)
+//#define RTC_ULP_TRIG_EN     BIT(9)  //!< ULP wakeup
+//#define RTC_BT_TRIG_EN      BIT(10) //!< BT wakeup (light sleep only)
 #define RTC_COCPU_TRIG_EN   BIT(11)
 #define RTC_XTAL32K_DEAD_TRIG_EN    BIT(12)
 #define RTC_COCPU_TRAP_TRIG_EN      BIT(13)
-#define RTC_USB_TRIG_EN             BIT(14)
+#define RTC_USB_TRIG_EN             BIT(15)
 
 /**
  * @brief Enter deep or light sleep mode
